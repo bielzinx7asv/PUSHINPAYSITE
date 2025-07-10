@@ -160,6 +160,7 @@
   <div class="badge-seguro">🔐 Verificado | Seguro | Nenhum dado é armazenado</div>
 </div>
 <div class="notificacao" id="notificacao"></div>
+
 <script>
 let transacaoID = '';
 let valorOriginal = 0;
@@ -188,7 +189,7 @@ function gerarPix() {
   fetch("https://api.pushinpay.com.br/api/pix/cashIn", {
     method: "POST",
     headers: {
-      "Authorization": Bearer ${token},
+      "Authorization": `Bearer ${token}`,
       "Accept": "application/json",
       "Content-Type": "application/json"
     },
@@ -199,34 +200,35 @@ function gerarPix() {
   })
   .then(res => res.json())
   .then(json => {
+    if (!json.qr_code) {
+      document.getElementById('codigoPix').value = '⚠️ Erro ao gerar o código';
+      return;
+    }
     transacaoID = json.id;
-    document.getElementById('codigoPix').value = json.qr_code || 'Erro';
+    document.getElementById('codigoPix').value = json.qr_code;
     document.getElementById('statusPagamento').innerText = "💸 PIX gerado. Liberte o desejo antes que expire...";
   });
 }
 
 function verificarPagamento() {
   if (!transacaoID) return alert("🚫 Nenhuma transação ativa");
-  fetch(https://api.pushinpay.com.br/api/transactions/${transacaoID}, {
+
+  fetch(`https://api.pushinpay.com.br/api/transactions/${transacaoID}`, {
     method: "GET",
     headers: {
-      "Authorization": Bearer ${token},
+      "Authorization": `Bearer ${token}`,
       "Accept": "application/json"
     }
   })
   .then(res => res.json())
   .then(json => {
     if (json.status === "paid") {
-      if (valorOriginal < 990) {
-        window.location.href = "https://memimadireito.vercel.app/";
-      } else {
-        document.getElementById('statusPagamento').innerText = "✅ Pagamento confirmado! Liberando seu acesso VIP...";
-        setTimeout(() => {
-          window.location.href = "entrega.html";
-        }, 3000);
-      }
+      document.getElementById('statusPagamento').innerText = "✅ Pagamento confirmado! Liberando seu acesso VIP...";
+      setTimeout(() => {
+        window.location.href = valorOriginal < 990 ? "https://memimadireito.vercel.app/" : "entrega.html";
+      }, 3000);
     } else {
-      document.getElementById('statusPagamento').innerText = ⏳ Status: ${json.status};
+      document.getElementById('statusPagamento').innerText = `⏳ Status: ${json.status}`;
     }
   });
 }
@@ -265,73 +267,22 @@ setInterval(() => {
   if (tempo > 0) {
     let min = Math.floor(tempo / 60);
     let seg = tempo % 60;
-    timerEl.textContent = Expira em: ${String(min).padStart(2, '0')}:${String(seg).padStart(2, '0')};
+    timerEl.textContent = `Expira em: ${String(min).padStart(2, '0')}:${String(seg).padStart(2, '0')}`;
     tempo--;
   } else {
     tempo = 299;
   }
 }, 1000);
+
+// 🧪 MODO DEBUG: Tecla "d" simula pagamento manual
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'd') {
+    alert("🔧 MODO TESTE ATIVADO");
+    valorOriginal = parseInt(prompt("Digite o valor EM CENTAVOS (ex: 400 para R$4,00 ou 1500 para R$15,00):"));
+    if (isNaN(valorOriginal)) return alert("❌ Valor inválido.");
+    window.location.href = valorOriginal < 990 ? "https://memimadireito.vercel.app/" : "entrega.html";
+  }
+});
 </script>
 </body>
 </html>
-<script>
-    // ... [todo o código anterior permanece] ...
-    
-    // 🧪 MODO DEBUG: simula o pagamento com base no valor digitado manualmente
-    // Pressione a tecla "d" para ativar
-    
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'd') {
-        alert("🔧 MODO TESTE ATIVADO: você vai simular um pagamento sem pagar nada!");
-        valorOriginal = parseInt(prompt("Digite o valor EM CENTAVOS (ex: 400 para R$4,00 ou 1500 para R$15,00):"));
-        if (isNaN(valorOriginal)) {
-          alert("❌ Valor inválido. Tente de novo");
-          return;
-        }
-        if (valorOriginal < 990) {
-          window.location.href = "https://memimadireito.vercel.app/";
-        } else {
-          window.location.href = "entrega.html";
-        }
-      }
-    });
-    // 🧪 MODO DEBUG: simula o pagamento com base no valor digitado manualmente
-    // Pressione a tecla "d" para ativar
-    
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'd') {
-        alert("🔧 MODO TESTE ATIVADO: você vai simular um pagamento sem pagar nada!");
-        valorOriginal = parseInt(prompt("Digite o valor EM CENTAVOS (ex: 400 para R$4,00 ou 1500 para R$15,00):"));
-        if (isNaN(valorOriginal)) {
-          alert("❌ Valor inválido. Tente de novo");
-          return;
-        }
-        if (valorOriginal < 990) {
-          window.location.href = "https://memimadireito.vercel.app/";
-        } else {
-          window.location.href = "entrega.html";
-        }
-      }
-    });
-    // 🧪 MODO DEBUG: simula o pagamento com base no valor digitado manualmente
-    // Pressione a tecla "d" para ativar
-    
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'd') {
-        alert("🔧 MODO TESTE ATIVADO: você vai simular um pagamento sem pagar nada!");
-        valorOriginal = parseInt(prompt("Digite o valor EM CENTAVOS (ex: 400 para R$4,00 ou 1500 para R$15,00):"));
-        if (isNaN(valorOriginal)) {
-          alert("❌ Valor inválido. Tente de novo");
-          return;
-        }
-        if (valorOriginal < 990) {
-          window.location.href = "https://memimadireito.vercel.app/";
-        } else {
-          window.location.href = "entrega.html";
-        }
-      }
-    });
-    </script>
-    </body>
-    </html>
-    
